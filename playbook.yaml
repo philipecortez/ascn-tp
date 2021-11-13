@@ -1,0 +1,109 @@
+---
+- hosts: wikijs
+  tasks:
+    - name: Dist upgrade
+      apt:
+        upgrade: dist
+      become: true
+
+    - name: Add docker apt key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      become: true
+
+    - name: Add docker repositories to sources list
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+      become: true
+
+    - name: Update repositories
+      apt:
+        update_cache: true
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg-agent
+          - software-properties-common
+          - openssl
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - python3-docker
+          # - python3-dockerpty
+          # - python3-dockerpycreds
+        state: latest
+      become: true
+
+    - name: Add vagrant user to docker group
+      ansible.builtin.user:
+        name: vagrant
+        append: true
+        groups: docker
+      become: true
+
+    - name: Reboot machine
+      reboot:
+      become: true
+
+    - name: Create wiki dir
+      file:
+        path: /home/vagrant/etc/wiki
+        state: directory
+      become_user: vagrant
+    
+    - name: Create password file
+      shell: openssl rand -base64 32 > /home/vagrant/etc/wiki/.db-secret
+      become_user: vagrant
+    
+    - name: Create docker network
+      docker_network:
+        name: wikinet
+      become_user: vagrant
+    
+    - name: Create docker volume
+      docker_volume:
+        name: pgdata
+      become_user: vagrant
+
+    - name: postgres container
+      docker_container:
+        name: db
+        image: postgres:11
+        hostname: db
+        volumes:
+          - /home/vagrant/etc/wiki/.db-secret:/etc/wiki/.db-secret:ro
+          - pgdata:/var/lib/postgresql/data
+        env:
+          POSTGRES_DB: wiki
+          POSTGRES_USER: wiki
+          POSTGRES_PASSWORD_FILE: /etc/wiki/.db-secret
+        network_mode: wikinet
+        restart_policy: unless-stopped
+      become_user: vagrant
+
+    - name: application container
+      docker_container:
+        name: wiki
+        image: requarks/wiki:2
+        hostname: wiki
+        volumes:
+          - /home/vagrant/etc/wiki/.db-secret:/etc/wiki/.db-secret:ro
+        env:
+          DB_TYPE: postgres
+          DB_HOST: db
+          DB_PORT: "5432"
+          DB_PASS_FILE: /etc/wiki/.db-secret
+          DB_USER: wiki
+          DB_NAME: wiki
+          UPGRADE_COMPANION: "1"
+        network_mode: wikinet
+        ports:
+          - 80:3000
+          - 443:3443
+        restart_policy: unless-stopped
+      become_user: vagrant
+
+    #docker create --name=wiki-update-companion -v /var/run/docker.sock:/var/run/docker.sock:ro --restart=unless-stopped -h wiki-update-companion --network=wikinet requarks/wiki-update-companion:latest
