@@ -1,7 +1,7 @@
 # ASCN-TP
 
 ## Prerequisites
-in order to follow these steps you need to install `vagrant`(https://www.vagrantup.com/docs/installation) and `ansible` (https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) before
+in order to follow these steps you need to install `vagrant`(https://www.vagrantup.com/docs/installation) and `ansible` (https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
 
 ## Setup
