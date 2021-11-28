@@ -1,7 +1,0 @@
-plugin: gcp_compute
-projects:
-  - ascn-331508
-auth_kind: serviceaccount
-service_account_file: ./ascn-credentials.json
-groups:
-  app_server: "'wikijs' in (labels|list)"
