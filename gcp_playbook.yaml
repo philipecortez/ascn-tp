@@ -1,0 +1,78 @@
+---
+- name: Create compute instances
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - compute_instance_creation  
+
+#- name: Wait for SSH to come up
+#  wait_for: host={{ address.address }} port=22 delay=10 timeout=60
+#
+#- name: Add host to groupname
+#  add_host: hostname={{ address.address }} groupname=new_instances
+
+- name: Config app machines
+  hosts: label_role_wikijs
+  gather_facts: no
+  roles:
+    - wikijs
+
+- name: Config database machines
+  hosts: label_role_db
+  gather_facts: no
+  roles:
+   - database
+
+
+
+
+
+#  tasks:
+#    - name: Create boot disk
+#      gcp_compute_disk:
+#        name: 'disk-instance'
+#        state: present
+#        size_gb: 20
+#        source_image: 'projects/confidential-vm-images/global/images/ubuntu-2004-focal-v20210927'
+#        zone: "{{ zone }}"
+#        project: "{{ project }}"
+#        auth_kind: "{{ auth_kind }}"
+#        service_account_file: "{{ service_account_file }}"
+#        scopes: "{{ scopes }}"
+#      register: disk
+#    
+#    - name: Create IP address
+#      gcp_compute_address:
+#        name: 'address-instance'
+#        project: "{{ project }}"
+#        auth_kind: "{{ auth_kind }}"
+#        service_account_file: "{{ service_account_file }}"
+#        scopes: "{{ scopes }}"
+#        region: "{{ region }}"
+#        state: present
+#      register: address
+#
+#    - name: Create an Instance
+#      gcp_compute_instance:
+#        state: present
+#        name: wikijs-1
+#        machine_type: e2-micro
+#        labels:
+#          wikijs: ''
+#        disks:
+#          - auto_delete: true
+#            boot: true
+#            source: "{{ disk }}"
+#        network_interfaces:
+#          - network: null
+#            access_configs:
+#              - name: 'External NAT'
+#                nat_ip: "{{ address }}"
+#                type: 'ONE_TO_ONE_NAT'
+#        zone: "{{ zone }}"
+#        project: "{{ project }}"
+#        auth_kind: "{{ auth_kind }}"
+#        service_account_file: "{{ service_account_file }}"
+#        scopes: "{{ scopes }}"
+#      register: instance
+#
