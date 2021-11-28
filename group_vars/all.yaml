@@ -1,0 +1,15 @@
+service_account_file: ascn-credentials.json
+project: ascn-331508
+auth_kind: serviceaccount
+scopes:
+  - https://www.googleapis.com/auth/compute
+zone: europe-west1-b
+region: europe-west1
+source_img: 'projects/confidential-vm-images/global/images/ubuntu-2004-focal-v20210927'
+machine_type: e2-micro
+
+db_host: "db"
+db_port: "5432"
+db_user: wikijs
+db_passwd: passwd
+db_name: wiki
