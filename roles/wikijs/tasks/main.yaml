@@ -1,0 +1,24 @@
+- name: Install nodejs
+  apt:
+    update_cache: true
+    pkg:
+    - nodejs
+    state: latest
+  become: true
+
+- name: Create wiki dir
+  file:
+    path: /home/gcp_ansible/wiki
+    state: directory
+    mode: '0755'
+
+- name: Get wikijs files
+  unarchive:
+    src: https://github.com/Requarks/wiki/releases/download/2.5.219/wiki-js.tar.gz
+    dest: /home/gcp_ansible/wiki
+    remote_src: true
+
+- name: "Config wikijs"
+  template:
+    src: templates/config.yml.j2
+    dest: /home/gcp_ansible/wiki/config.yml
