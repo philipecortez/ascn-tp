@@ -1,0 +1,45 @@
+- name: Install postgres
+  apt:
+    update_cache: true
+    pkg:
+    - postgresql
+    - python3-psycopg2
+    - libpq-dev
+    - acl
+    state: latest
+  become: true
+
+#- name: Allow md5 connection for the db user
+#  postgresql_pg_hba:
+#    dest: "/etc/postgresql/12/main/pg_hba.conf"
+#    contype: local
+#    databases: all
+#    method: md5
+#    users: postgres
+#    state: present
+#  become: true
+
+- name: ensure postgres
+  service:
+    name: postgresql
+    state: started
+    enabled: true
+  become: true
+
+- name: "Create app database"
+  postgresql_db:
+    name: "{{ db_name }}"
+    state: present
+  become: true
+  become_user: postgres
+
+- name: "Create db user"
+  postgresql_user:
+    state: present
+    name: "{{ db_user }}"
+    password: "{{ db_passwd }}"
+    db: "{{ db_name }}"
+    priv: ALL
+    role_attr_flags: NOSUPERUSER,NOCREATEDB
+  become: true
+  become_user: postgres
