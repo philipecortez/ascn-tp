@@ -1,2 +1,3 @@
 .vagrant/
 ascn-credentials.json
+.tool-versions
