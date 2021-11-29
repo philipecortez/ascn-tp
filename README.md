@@ -24,12 +24,18 @@ simply run `vagrant up`.
 
 ```
 
-After that run the ansible-playbook command
+After that ssh into the created machine
 
 ```bash
-❯ ansible-playbook playbook.yaml -i hosts -u vagrant --private-key .vagrant/machines/wikijs/virtualbox/private_key
+❯ vagrant ssh
 ```
 
-Last but not least
+then go to the `/vagrant` dir and run the playbook
 
-Go to the browser and type the ip address of the virtual machine `172.17.177.42`
+```bash
+❯ ansible-playbook gcp_playbook.yaml --private-key=./your_private_key
+```
+
+**note:** you'll have to create a new ssh key and copy it to the google cloud platforn, then copy
+it to the project dir and use it as `your_private_key`, otherwise it will
+not work properly.
