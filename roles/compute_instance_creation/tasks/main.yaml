@@ -14,7 +14,6 @@
     - db
   register: disks
 
-
 - name: Create IP address
   gcp_compute_address:
     name: "address-{{ item }}"
@@ -55,3 +54,24 @@
     - wikijs
     - db
   register: instances
+
+- name: Create a firewall
+  gcp_compute_firewall:
+    state: present
+    name: wikijs
+    allowed:
+      - ip_protocol: tcp
+        ports:
+          - '3000'
+    project: "{{ project }}"
+    auth_kind: "{{ auth_kind }}"
+    service_account_file: "{{ service_account_file }}"
+    scopes: "{{ scopes }}"
+
+- name: Wait for SSH to come up
+  wait_for:
+    host: "{{ item.address }}"
+    port: 22
+    delay: 10
+    timeout: 60
+  loop: "{{ addresses.results }}"
