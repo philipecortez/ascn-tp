@@ -22,3 +22,16 @@
   template:
     src: templates/config.yml.j2
     dest: /home/gcp_ansible/wiki/config.yml
+
+- name: "Config wikijs"
+  template:
+    src: templates/wiki.service.j2
+    dest: /etc/systemd/system/wiki.service
+  become: true
+
+- name: Start wikijs
+  service:
+    name: wiki
+    state: started
+    enabled: true
+  become: true

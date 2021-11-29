@@ -1,0 +1,15 @@
+[Unit]
+Description=Wiki.js
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node server
+Restart=always
+# Consider creating a dedicated user for Wiki.js here:
+User=gcp_ansible
+Environment=NODE_ENV=production
+WorkingDirectory=/home/gcp_ansible/wiki
+
+[Install]
+WantedBy=multi-user.target
