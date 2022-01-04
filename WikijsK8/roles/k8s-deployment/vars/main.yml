@@ -1,0 +1,4 @@
+---
+app: wikijs
+db : mariadb
+image: requarks/wiki:beta
