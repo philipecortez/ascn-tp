@@ -179,3 +179,13 @@
         DATABASE: d2lraWpz
         USER: d2lraWpz
         PASSWORD: b2xh
+
+- name: Install Elasticsearch crds
+  kubernetes.core.k8s:
+    state: present
+    src: ./files/crds.yaml
+
+- name: Install Elasticsearch Operator
+  kubernetes.core.k8s:
+    state: present
+    src: ./files/operator.yaml
