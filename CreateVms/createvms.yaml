@@ -8,7 +8,7 @@
     zone: europe-west1-b
     region: europe-west1
     source_img: 'projects/confidential-vm-images/global/images/ubuntu-2004-focal-v20210927'
-    machine_type: e2-small
+    machine_type: e2-medium
   tasks:
     - name: Create boot disks
       gcp_compute_disk:
