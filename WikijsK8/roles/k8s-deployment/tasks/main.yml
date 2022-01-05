@@ -225,3 +225,7 @@
           service:
             spec:
               type: LoadBalancer
+- name: Deploy metricbeats
+  kubernetes.core.k8s:
+    state: present
+    src: ./files/metricbeats.yaml
