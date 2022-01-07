@@ -129,40 +129,46 @@
   kubernetes.core.k8s:    
     state: present    
     definition:      
-      apiVersion: v1      
-      kind: Pod      
-      metadata:        
-        name: "{{ app }}"        
-        namespace: "{{ namespace }}"        
-        labels:          
-          app: "{{ app }}"      
-      spec:        
-        containers:          
-          - name: "{{ app }}"            
-            image: "{{ image }}"            
-            imagePullPolicy: Always
-            env: # Database ----
-            - name: DB_TYPE
-              value: "mariadb"
-            - name: DB_HOST
-              value: "mariadb"
-            - name: DB_PORT
-              value: "3306"
-            - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: mariadb-secret
-                  key: DATABASE
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mariadb-secret
-                  key: USER
-            - name: DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: mariadb-secret
-                  key: PASSWORD
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ app }}-deployment"
+      spec:
+        replicas: 3
+        selector:
+          matchLabels:
+            app: chef-server
+        template:
+          metadata:
+            labels:
+              app: chef-server
+          spec:
+            containers:
+            - name: "{{ app }}"
+              image: "{{ image }}"
+              imagePullPolicy: Always
+              env: # Database ----
+              - name: DB_TYPE
+                value: "mariadb"
+              - name: DB_HOST
+                value: "mariadb"
+              - name: DB_PORT
+                value: "3306"
+              - name: DB_NAME
+                valueFrom:
+                  secretKeyRef:
+                    name: mariadb-secret
+                    key: DATABASE
+              - name: DB_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: mariadb-secret
+                    key: USER
+              - name: DB_PASS
+                valueFrom:
+                  secretKeyRef:
+                    name: mariadb-secret
+                    key: PASSWORD
 
 - name: Create secret for mariadb  
   kubernetes.core.k8s:    
@@ -225,6 +231,7 @@
           service:
             spec:
               type: LoadBalancer
+
 - name: Deploy metricbeats
   kubernetes.core.k8s:
     state: present
