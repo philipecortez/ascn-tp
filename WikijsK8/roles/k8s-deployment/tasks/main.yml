@@ -93,6 +93,7 @@
         selector:
           matchLabels:
             app: "{{ db }}"
+        serviceName: mariadb
         replicas: 3
         template:
           metadata:
@@ -131,18 +132,14 @@
               - name: app-storage
                 mountPath: /var/lib/mysql
         volumeClaimTemplates:
-          - metadata:
-              name: app-storage
-            spec:
-              accessModes: [ "ReadWriteOnce" ]
-              storageClassName: "gold"
-              resources:
-                requests:
-                  storage: 20Gi
-#            volumes:
-#            - name: app-storage
-#              persistentVolumeClaim:
-#                claimName: webapps-storage
+        - metadata:
+            name: app-storage
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: "gold"
+            resources:
+              requests:
+                storage: 20Gi
 
 - name: Create k8s pod for wikijs
   kubernetes.core.k8s:    
