@@ -52,7 +52,10 @@
       metadata:
         name: mariadb
         namespace: wikijs
+        annotations:
+          networking.gke.io/load-balancer-type: "Internal"
       spec:
+        type: LoadBalancer
         selector:
           app: mariadb
         ports:
