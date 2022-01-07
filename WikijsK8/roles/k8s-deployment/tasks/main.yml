@@ -26,22 +26,22 @@
         fstype: ext4
         replication-type: none      
 
-- name: create pvc
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: PersistentVolumeClaim
-      metadata:
-        name: webapps-storage
-        namespace: wikijs
-      spec:
-        storageClassName: gold
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 20Gi
+#- name: create pvc
+#  kubernetes.core.k8s:
+#    state: present
+#    definition:
+#      apiVersion: v1
+#      kind: PersistentVolumeClaim
+#      metadata:
+#        name: webapps-storage
+#        namespace: wikijs
+#      spec:
+#        storageClassName: gold
+#        accessModes:
+#          - ReadWriteOnce
+#        resources:
+#          requests:
+#            storage: 20Gi
 
 - name: Create postgres service
   kubernetes.core.k8s:    
@@ -108,7 +108,7 @@
               imagePullPolicy: Always
               env:
               - name: HA_ACTIVE
-                value: true
+                value: "true"
               - name: POSTGRES_PASSWORD
                 valueFrom:
                   secretKeyRef:
