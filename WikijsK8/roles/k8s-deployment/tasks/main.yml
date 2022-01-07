@@ -84,49 +84,58 @@
   kubernetes.core.k8s:    
     state: present    
     definition:      
-      apiVersion: v1      
-      kind: Pod      
-      metadata:        
-        name: "{{ db }}"        
-        namespace: "{{ namespace }}"        
-        labels:          
-          app: "{{ db }}"      
-      spec:        
-        containers:
-        - name: mariadb
-          image: mariadb:10.4
-          imagePullPolicy: Always
-          env:
-          - name: MYSQL_ROOT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: mariadb-secret
-                key: PASSWORD
-          - name: MYSQL_DATABASE
-            valueFrom:
-              secretKeyRef:
-                name: mariadb-secret
-                key: DATABASE
-          - name: MYSQL_USER
-            valueFrom:
-              secretKeyRef:
-                name: mariadb-secret
-                key: USER
-          - name: MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: mariadb-secret
-                key: PASSWORD
-          ports:
-          - containerPort: 3306
-            name: mysql
-          volumeMounts:
-          - name: app-storage
-            mountPath: /var/lib/mysql
-        volumes:
-        - name: app-storage
-          persistentVolumeClaim:
-            claimName: webapps-storage
+      apiVersion: apps/v1      
+      kind: Deployment
+      metadata:
+        name: "{{ db }}-deployment"
+        namespace: "{{ namespace }}"
+      spec:
+        replicas: 3
+        selector:
+          matchlabels:
+            app: "{{ db }}"
+        template:
+          metadata:
+            name: "{{ db }}"
+            namespace: "{{ namespace }}"
+            labels:
+              app: "{{ db }}"
+          spec:
+            containers:
+            - name: mariadb
+              image: mariadb:10.4
+              imagePullPolicy: Always
+              env:
+              - name: MYSQL_ROOT_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: mariadb-secret
+                    key: PASSWORD
+              - name: MYSQL_DATABASE
+                valueFrom:
+                  secretKeyRef:
+                    name: mariadb-secret
+                    key: DATABASE
+              - name: MYSQL_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: mariadb-secret
+                    key: USER
+              - name: MYSQL_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: mariadb-secret
+                    key: PASSWORD
+              ports:
+              - containerPort: 3306
+                name: mysql
+              volumeMounts:
+              - name: app-storage
+                mountPath: /var/lib/mysql
+            volumes:
+            - name: app-storage
+              persistentVolumeClaim:
+                claimName: webapps-storage
 
 - name: Create k8s pod for wikijs
   kubernetes.core.k8s:    
