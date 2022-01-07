@@ -43,23 +43,23 @@
           requests:
             storage: 20Gi
 
-- name: Create mariadb service
+- name: Create postgres service
   kubernetes.core.k8s:    
     state: present    
     definition: 
       apiVersion: v1
       kind: Service
       metadata:
-        name: mariadb
+        name: postgres
         namespace: wikijs
         annotations:
           networking.gke.io/load-balancer-type: "Internal"
       spec:
         type: LoadBalancer
         selector:
-          app: mariadb
+          app: postgres
         ports:
-        - name: mariadb
+        - name: postgres
           protocol: TCP
           port: 3306
 
@@ -80,7 +80,7 @@
         selector:
           app: "wikijs"
         
-- name: Create k8s pod for mariadb  
+- name: Create k8s pod for postgres  
   kubernetes.core.k8s:    
     state: present    
     definition:      
@@ -95,7 +95,7 @@
         selector:
           matchLabels:
             app: "{{ db }}"
-        serviceName: "mariadb"
+        serviceName: "postgres"
         replicas: 3
         template:
           metadata:
@@ -103,36 +103,33 @@
               app: "{{ db }}"
           spec:
             containers:
-            - name: mariadb
-              image: mariadb:10.4
+            - name: postgres
+              image: postgres:11-alpine
               imagePullPolicy: Always
               env:
-              - name: MYSQL_ROOT_PASSWORD
+              - name: HA_ACTIVE
+                value: true
+              - name: POSTGRES_PASSWORD
                 valueFrom:
                   secretKeyRef:
-                    name: mariadb-secret
+                    name: postgres-secret
                     key: PASSWORD
-              - name: MYSQL_DATABASE
+              - name: POSTGRES_DB
                 valueFrom:
                   secretKeyRef:
-                    name: mariadb-secret
+                    name: postgres-secret
                     key: DATABASE
-              - name: MYSQL_USER
+              - name: POSTGRES_USER
                 valueFrom:
                   secretKeyRef:
-                    name: mariadb-secret
+                    name: postgres-secret
                     key: USER
-              - name: MYSQL_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: mariadb-secret
-                    key: PASSWORD
-              ports:
-              - containerPort: 3306
-                name: mysql
+             ports:
+              - containerPort: 5432
+                name: postgres
               volumeMounts:
               - name: app-storage
-                mountPath: /var/lib/mysql
+                mountPath: /var/lib/postgresql/data
         volumeClaimTemplates:
         - metadata:
             name: app-storage
@@ -168,35 +165,35 @@
               imagePullPolicy: Always
               env: # Database ----
               - name: DB_TYPE
-                value: "mariadb"
+                value: "postgres"
               - name: DB_HOST
-                value: "mariadb"
+                value: "postgres"
               - name: DB_PORT
-                value: "3306"
+                value: "5432"
               - name: DB_NAME
                 valueFrom:
                   secretKeyRef:
-                    name: mariadb-secret
+                    name: postgres-secret
                     key: DATABASE
               - name: DB_USER
                 valueFrom:
                   secretKeyRef:
-                    name: mariadb-secret
+                    name: postgres-secret
                     key: USER
               - name: DB_PASS
                 valueFrom:
                   secretKeyRef:
-                    name: mariadb-secret
+                    name: postgres-secret
                     key: PASSWORD
 
-- name: Create secret for mariadb  
+- name: Create secret for postgres  
   kubernetes.core.k8s:    
     state: present    
     definition:      
       apiVersion: v1      
       kind: Secret      
       metadata:        
-        name: mariadb-secret        
+        name: postgres-secret        
         namespace: "{{ namespace }}"        
       type: Opaque
       data:

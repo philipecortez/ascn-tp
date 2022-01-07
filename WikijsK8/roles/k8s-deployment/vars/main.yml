@@ -1,4 +1,4 @@
 ---
 app: wikijs
-db : mariadb
+db : postgresdb
 image: requarks/wiki:beta
