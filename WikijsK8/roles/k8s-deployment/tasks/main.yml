@@ -68,7 +68,7 @@
         kind: Service
         metadata:
           name: "wikijs"
-          namespace: wikijs
+          namespace: "{{ namespace }}"
         spec:
           type: LoadBalancer
           ports:
@@ -138,11 +138,11 @@
         replicas: 3
         selector:
           matchLabels:
-            app: chef-server
+            app: wikijs
         template:
           metadata:
             labels:
-              app: chef-server
+              app: wikijs
           spec:
             containers:
             - name: "{{ app }}"
