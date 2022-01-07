@@ -85,12 +85,12 @@
     state: present    
     definition:      
       apiVersion: apps/v1      
-      kind: Statefulset
+      kind: StatefulSet
       metadata:
         name: "{{ db }}-statefulset"
         namespace: "{{ namespace }}"
         labels:
-          app "{{ db }}"
+          app: "{{ db }}"
       spec:
         selector:
           matchLabels:
