@@ -96,8 +96,6 @@
             app: "{{ db }}"
         template:
           metadata:
-            name: "{{ db }}"
-            namespace: "{{ namespace }}"
             labels:
               app: "{{ db }}"
           spec:
