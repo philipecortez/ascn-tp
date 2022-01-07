@@ -1,4 +1,4 @@
 ---
 app: wikijs
-db : postgresdb
+db : postgres
 image: requarks/wiki:beta
