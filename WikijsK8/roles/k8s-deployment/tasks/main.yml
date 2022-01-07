@@ -61,7 +61,7 @@
         ports:
         - name: postgres
           protocol: TCP
-          port: 3306
+          port: 5432
 
 - name: Create wikijs service
   kubernetes.core.k8s:    
