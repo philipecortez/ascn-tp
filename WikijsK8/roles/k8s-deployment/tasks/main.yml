@@ -68,14 +68,15 @@
         kind: Service
         metadata:
           name: "wikijs"
-          namespace: wikijs
+          namespace: "{{ namespace }}"
         spec:
           type: LoadBalancer
           ports:
             - name: http
               port: 3000            
           selector:
-            app: "wikijs"
+            matchLabels:
+              app: "wikijs"
         
 - name: Create k8s pod for mariadb  
   kubernetes.core.k8s:    
@@ -138,11 +139,11 @@
         replicas: 3
         selector:
           matchLabels:
-            app: chef-server
+            app: wikijs
         template:
           metadata:
             labels:
-              app: chef-server
+              app: wikijs
           spec:
             containers:
             - name: "{{ app }}"
