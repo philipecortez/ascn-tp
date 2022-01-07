@@ -62,7 +62,7 @@
 
 - name: Create wikijs service
   kubernetes.core.k8s:    
-   state: present
+    state: present
     definition:
       apiVersion: v1
       kind: Service
