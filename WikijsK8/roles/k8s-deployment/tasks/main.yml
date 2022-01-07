@@ -133,6 +133,7 @@
       kind: Deployment
       metadata:
         name: "{{ app }}-deployment"
+        namespace: "{{ namespace }}"
       spec:
         replicas: 3
         selector:
