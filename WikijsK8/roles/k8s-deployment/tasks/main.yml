@@ -85,15 +85,15 @@
     state: present    
     definition:      
       apiVersion: apps/v1      
-      kind: Deployment
+      kind: Statefulset
       metadata:
-        name: "{{ db }}-deployment"
+        name: "{{ db }}-statefulset"
         namespace: "{{ namespace }}"
       spec:
-        replicas: 3
         selector:
-          matchlabels:
+          matchLabels:
             app: "{{ db }}"
+        replicas: 3
         template:
           metadata:
             labels:
@@ -130,10 +130,19 @@
               volumeMounts:
               - name: app-storage
                 mountPath: /var/lib/mysql
-            volumes:
-            - name: app-storage
-              persistentVolumeClaim:
-                claimName: webapps-storage
+        volumeClaimTemplates:
+          - metadata:
+              name: app-storage
+            spec:
+              accessModes: [ "ReadWriteOnce" ]
+              storageClassName: "gold"
+              resources:
+                requests:
+                  storage: 20Gi
+#            volumes:
+#            - name: app-storage
+#              persistentVolumeClaim:
+#                claimName: webapps-storage
 
 - name: Create k8s pod for wikijs
   kubernetes.core.k8s:    
