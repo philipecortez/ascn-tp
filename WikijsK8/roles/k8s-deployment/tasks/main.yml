@@ -89,11 +89,13 @@
       metadata:
         name: "{{ db }}-statefulset"
         namespace: "{{ namespace }}"
+        labels:
+          app "{{ db }}"
       spec:
         selector:
           matchLabels:
             app: "{{ db }}"
-        serviceName: mariadb
+        serviceName: "mariadb"
         replicas: 3
         template:
           metadata:
