@@ -1,12 +1,12 @@
 ---
 
-- name: Create a k8s namespace  
-  kubernetes.core.k8s:    
-    state: present    
-    definition:      
-      apiVersion: v1      
-      kind: Namespace      
-      metadata:        
+- name: Create a k8s namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
         name: "{{ namespace }}"
 
 - name: Create storage class
@@ -24,7 +24,7 @@
       parameters:
         type: pd-standard
         fstype: ext4
-        replication-type: none      
+        replication-type: none
 
 #- name: create pvc
 #  kubernetes.core.k8s:
@@ -44,9 +44,9 @@
 #            storage: 20Gi
 
 - name: Create postgres service
-  kubernetes.core.k8s:    
-    state: present    
-    definition: 
+  kubernetes.core.k8s:
+    state: present
+    definition:
       apiVersion: v1
       kind: Service
       metadata:
@@ -64,7 +64,7 @@
           port: 5432
 
 - name: Create wikijs service
-  kubernetes.core.k8s:    
+  kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1
@@ -79,12 +79,12 @@
             port: 3000
         selector:
           app: "wikijs"
-        
-- name: Create k8s pod for postgres  
-  kubernetes.core.k8s:    
-    state: present    
-    definition:      
-      apiVersion: apps/v1      
+ 
+- name: Create k8s pod for postgres
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
       kind: StatefulSet
       metadata:
         name: "{{ db }}-statefulset"
@@ -141,9 +141,9 @@
                 storage: 20Gi
 
 - name: Create k8s pod for wikijs
-  kubernetes.core.k8s:    
-    state: present    
-    definition:      
+  kubernetes.core.k8s:
+    state: present
+    definition:
       apiVersion: apps/v1
       kind: Deployment
       metadata:
@@ -186,21 +186,42 @@
                     name: postgres-secret
                     key: PASSWORD
 
-- name: Create secret for postgres  
-  kubernetes.core.k8s:    
-    state: present    
-    definition:      
-      apiVersion: v1      
-      kind: Secret      
-      metadata:        
-        name: postgres-secret        
-        namespace: "{{ namespace }}"        
+- name: Create secret for postgres
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: postgres-secret
+        namespace: "{{ namespace }}"
       type: Opaque
       data:
         ROOT: b2xh
         DATABASE: d2lraWpz
         USER: d2lraWpz
         PASSWORD: b2xh
+
+- name: Create k8s pod for wikijs
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: autoscaling/v1
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: wikijs-deployment
+        namespace: wikijs
+      spec:
+        maxReplicas: 10
+        minReplicas: 1
+        scaleTargetRef:
+          apiVersion: apps/v1
+          kind: Deployment
+          name: wikijs-deployment
+        targetCPUUtilizationPercentage: 50
+      status:
+        currentReplicas: 1
+        desiredReplicas: 1
 
 - name: Install Elasticsearch crds
   kubernetes.core.k8s:
