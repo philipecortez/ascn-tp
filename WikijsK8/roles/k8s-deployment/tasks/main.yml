@@ -26,6 +26,28 @@
         fstype: ext4
         replication-type: none
 
+- name: Create postgres primary service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: postgresql-primary
+        namespace: wikijs
+        labels:
+          app: postgres
+          role: primary
+      spec:
+        ports:
+        - port: 5432
+          name: postgres-port
+        clusterIP: None
+        selector:
+            app: postgres
+            # role: primary
+            statefulset.kubernetes.io/pod-name: postgres-statefulset-0
+
 - name: Create postgres service
   kubernetes.core.k8s:
     state: present
@@ -43,7 +65,7 @@
 #        type: LoadBalancer
         ports:
         - port: 5432
-          name: postgres
+          name: postgres-port
         clusterIP: None
         selector:
           app: postgres
@@ -150,7 +172,7 @@
               - name: DB_TYPE
                 value: "postgres"
               - name: DB_HOST
-                value: "postgres"
+                value: "postgresql-primary" #"postgres"
               - name: DB_PORT
                 value: "5432"
               - name: HA_ACTIVE
