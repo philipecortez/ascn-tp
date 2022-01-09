@@ -107,8 +107,6 @@
               image: postgres:11-alpine
               imagePullPolicy: Always
               env:
-              - name: HA_ACTIVE
-                value: "true"
               - name: POSTGRES_PASSWORD
                 valueFrom:
                   secretKeyRef:
@@ -170,6 +168,8 @@
                 value: "postgres"
               - name: DB_PORT
                 value: "5432"
+              - name: HA_ACTIVE
+                value: "true"
               - name: DB_NAME
                 valueFrom:
                   secretKeyRef:
