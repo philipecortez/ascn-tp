@@ -185,6 +185,9 @@
                   secretKeyRef:
                     name: postgres-secret
                     key: PASSWORD
+              resources:
+                requests:
+                  cpu: 10m
 
 - name: Create secret for postgres
   kubernetes.core.k8s:
@@ -202,7 +205,7 @@
         USER: d2lraWpz
         PASSWORD: b2xh
 
-- name: Create k8s pod for wikijs
+- name: Create k8s hpa for wikijs deployment
   kubernetes.core.k8s:
     state: present
     definition:
@@ -218,10 +221,16 @@
           apiVersion: apps/v1
           kind: Deployment
           name: wikijs-deployment
+        #metrics:
+        #  - type: Resource
+        #    resource:
+        #      name: cpu
+        #      type: Utilization
+        #      averageUtilization: 50
         targetCPUUtilizationPercentage: 50
-      status:
-        currentReplicas: 1
-        desiredReplicas: 1
+      #status:
+      #  currentReplicas: 1
+      #  desiredReplicas: 1
 
 - name: Install Elasticsearch crds
   kubernetes.core.k8s:

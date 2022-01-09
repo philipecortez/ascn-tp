@@ -4,7 +4,7 @@
     name: "{{ cluster_name }}"    
     initial_node_count: "{{ initial_node_count }}"    
     location: "{{ zone }}"    
-    network: "{{ network.name }}"    
+    network: "{{ network.name }}"
     project: "{{ project_id }}"
     default_max_pods_constraint:
       max_pods_per_node: "110"
