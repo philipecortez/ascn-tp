@@ -195,6 +195,16 @@
               resources:
                 requests:
                   cpu: 300m
+            volumes:
+            - name: podinfo
+              downwardAPI:
+                items:
+                  - path: "labels"
+                    fieldRef:
+                      fieldPath: metadata.labels
+                  - path: "annotations"
+                    fieldRef:
+                      fieldPath: metadata.annotations
 
 - name: Create secret for postgres
   kubernetes.core.k8s:
