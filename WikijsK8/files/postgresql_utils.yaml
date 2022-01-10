@@ -16,7 +16,7 @@ n/\n\n
     postgres --pwfile <(echo $POSTGRES_PASSWORD)\n    if [ $? -ne 0 ] \n    then\n
     \     echo \"  Failed to execute initdb.\"\n      exit 1\n    fi\n  else\n    echo
     \"  Identified this Pod to a secondary.\"\n    echo \"  Executing pg_basebackup...\"\n
-    \   /usr/lib/postgresql/12/bin/pg_basebackup -h postgresql-primary.pg.svc.cluster.local
+    \   /usr/lib/postgresql/12/bin/pg_basebackup -h postgresql-primary.wikijs.svc.cluster.local
     -U replicator -p 5432 -D $PGDATA -Fp -Xs -R\n    if [ $? -ne 0 ] \n    then\n
     \     echo \"  Failed to execute pg_basebackup.\"\n      exit 1\n    fi\n  fi\n
     \ echo \"  Done.\"  \nelse\n  echo \"Found the postgresql data directory at $PGDATA.\"\nfi\n\necho
