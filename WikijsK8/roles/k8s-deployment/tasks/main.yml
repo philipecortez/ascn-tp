@@ -121,7 +121,7 @@
           spec:
             containers:
             - name: postgres
-              image: postgres:11-alpine
+              image: postgres:11
               imagePullPolicy: Always
               command: ["gosu"]
               args: ["postgres", "bash", "/utils/pg-init.sh"]
@@ -158,18 +158,18 @@
                     key: POSTGRES_REPLICATION_PASSWORD
               - name: PGDATA
                 value: /var/lib/postgresql/data/pgdata
-            ports:
-              - containerPort: 5432
-                name: postgres
-            volumeMounts:
-              - name: app-storage
-                mountPath: /var/lib/postgresql/data
-              - name: configs
-                mountPath: /etc/postgresql        
-              - name: podinfo
-                mountPath: /etc/podinfo
-              - name: utils
-                mountPath: /utils
+              ports:
+                - containerPort: 5432
+                  name: postgres
+              volumeMounts:
+                - name: app-storage
+                  mountPath: /var/lib/postgresql/data
+                - name: configs
+                  mountPath: /etc/postgresql        
+                - name: podinfo
+                  mountPath: /etc/podinfo
+                - name: utils
+                  mountPath: /utils
             volumes:
             - name: configs
               configMap:
