@@ -121,7 +121,7 @@
           spec:
             containers:
             - name: postgres
-              image: postgres:11
+              image: postgres:12
               imagePullPolicy: Always
               command: ["gosu"]
               args: ["postgres", "bash", "/utils/pg-init.sh"]
