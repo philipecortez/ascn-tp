@@ -70,6 +70,16 @@
         selector:
           app: postgres
 
+- name: Create postgresql replication configmap
+  kubernetes.core.k8s:
+    state: present
+    src: ./files/postgresql_conf.yaml
+
+- name: Create postgresql replication configmap
+  kubernetes.core.k8s:
+    state: present
+    src: ./files/postgresql_utils.yaml
+
 - name: Create wikijs service
   kubernetes.core.k8s:
     state: present
@@ -113,6 +123,8 @@
             - name: postgres
               image: postgres:11-alpine
               imagePullPolicy: Always
+              command: ["gosu"]
+              args: ["postgres", "bash", "/utils/pg-init.sh"]
               env:
               - name: POSTGRES_PASSWORD
                 valueFrom:
@@ -129,12 +141,51 @@
                   secretKeyRef:
                     name: postgres-secret
                     key: USER
+              - name: POSTGRES_REPLICATION_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-secret
+                    key: POSTGRES_REPLICATION_USERNAME
+              - name: POSTGRES_REPLICATION_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-secret
+                    key: POSTGRES_REPLICATION_PASSWORD
+              - name: PGPASSWORD # for pg_basebackup. It will authenticate as the replication user "replicator"
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-secret
+                    key: POSTGRES_REPLICATION_PASSWORD
+              - name: PGDATA
+                value: /var/lib/postgresql/data/pgdata
             ports:
               - containerPort: 5432
                 name: postgres
             volumeMounts:
               - name: app-storage
                 mountPath: /var/lib/postgresql/data
+              - name: configs
+                mountPath: /etc/postgresql        
+              - name: podinfo
+                mountPath: /etc/podinfo
+              - name: utils
+                mountPath: /utils
+            volumes:
+            - name: configs
+              configMap:
+                name: postgresql-configs
+            - name: utils
+              configMap:
+                name: postgresql-utils
+            - name: podinfo
+              downwardAPI:
+                items:
+                  - path: "labels"
+                    fieldRef:
+                      fieldPath: metadata.labels
+                  - path: "annotations"
+                    fieldRef:
+                      fieldPath: metadata.annotations
         volumeClaimTemplates:
         - metadata:
             name: app-storage
@@ -195,16 +246,6 @@
               resources:
                 requests:
                   cpu: 300m
-            volumes:
-            - name: podinfo
-              downwardAPI:
-                items:
-                  - path: "labels"
-                    fieldRef:
-                      fieldPath: metadata.labels
-                  - path: "annotations"
-                    fieldRef:
-                      fieldPath: metadata.annotations
 
 - name: Create secret for postgres
   kubernetes.core.k8s:
@@ -221,6 +262,8 @@
         DATABASE: d2lraWpz
         USER: d2lraWpz
         PASSWORD: b2xh
+        POSTGRES_REPLICATION_USERNAME: cmVwbGljYXRvcg==
+        POSTGRES_REPLICATION_PASSWORD: b2xh
 
 - name: Create k8s hpa for wikijs deployment
   kubernetes.core.k8s:
