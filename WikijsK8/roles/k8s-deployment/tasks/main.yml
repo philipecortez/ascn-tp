@@ -87,6 +87,12 @@
             - name: postgres
               image: postgres:11-alpine
               imagePullPolicy: Always
+              ports:
+              - containerPort: 5432
+                name: postgres-port
+              volumeMounts:
+              - name: app-storage
+                mountPath: /var/lib/postgresql/data
               env:
               - name: POSTGRES_PASSWORD
                 valueFrom:
@@ -103,12 +109,6 @@
                   secretKeyRef:
                     name: postgres-secret
                     key: USER
-            ports:
-              - containerPort: 5432
-                name: postgres
-            volumeMounts:
-              - name: app-storage
-                mountPath: /var/lib/postgresql/data
         volumeClaimTemplates:
         - metadata:
             name: app-storage
