@@ -1,5 +1,4 @@
 ---
-
 - name: Create a k8s namespace
   kubernetes.core.k8s:
     state: present
@@ -204,7 +203,7 @@
           apiVersion: apps/v1
           kind: Deployment
           name: wikijs-deployment
-        targetCPUUtilizationPercentage: 50
+        targetCPUUtilizationPercentage: 80
 
 #- name: Install Elasticsearch crds
 #  kubernetes.core.k8s:
