@@ -92,8 +92,10 @@
                 name: postgres-port
               volumeMounts:
               - name: app-storage
-                mountPath: /var/lib/postgresql/data/wiki
+                mountPath: /var/lib/postgresql/data/
               env:
+              - name: PGDATA
+                value: /var/lib/postgresql/data/wiki
               - name: POSTGRES_PASSWORD
                 valueFrom:
                   secretKeyRef:
