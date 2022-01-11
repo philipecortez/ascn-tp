@@ -103,12 +103,12 @@
                   secretKeyRef:
                     name: postgres-secret
                     key: USER
-              ports:
-                - containerPort: 5432
-                  name: postgres
-              volumeMounts:
-                - name: app-storage
-                  mountPath: /var/lib/postgresql/data
+            ports:
+              - containerPort: 5432
+                name: postgres
+            volumeMounts:
+              - name: app-storage
+                mountPath: /var/lib/postgresql/data
         volumeClaimTemplates:
         - metadata:
             name: app-storage
