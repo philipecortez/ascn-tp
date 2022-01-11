@@ -202,7 +202,7 @@
           apiVersion: apps/v1
           kind: Deployment
           name: wikijs-deployment
-       targetCPUUtilizationPercentage: 50
+        targetCPUUtilizationPercentage: 50
 
 #- name: Install Elasticsearch crds
 #  kubernetes.core.k8s:
@@ -249,8 +249,8 @@
 #          service:
 #            spec:
 #              type: LoadBalancer
-
-- name: Deploy metricbeats
-  kubernetes.core.k8s:
-    state: present
-    src: ./files/metricbeats.yaml
+#
+#- name: Deploy metricbeats
+#  kubernetes.core.k8s:
+#    state: present
+#    src: ./files/metricbeats.yaml
