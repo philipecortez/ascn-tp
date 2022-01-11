@@ -26,28 +26,6 @@
         fstype: ext4
         replication-type: none
 
-- name: Create postgres primary service
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: Service
-      metadata:
-        name: postgresql-primary
-        namespace: wikijs
-        labels:
-          app: postgres
-          role: primary
-      spec:
-        ports:
-        - port: 5432
-          name: postgres-port
-        clusterIP: None
-        selector:
-            app: postgres
-            # role: primary
-            statefulset.kubernetes.io/pod-name: postgres-statefulset-0
-
 - name: Create postgres service
   kubernetes.core.k8s:
     state: present
@@ -59,26 +37,12 @@
         namespace: wikijs
         labels:
           app: postgres
-#        annotations:
-#          networking.gke.io/load-balancer-type: "Internal"
       spec:
-#        type: LoadBalancer
         ports:
         - port: 5432
           name: postgres-port
-        clusterIP: None
         selector:
           app: postgres
-
-- name: Create postgresql replication configmap
-  kubernetes.core.k8s:
-    state: present
-    src: ./files/postgresql_conf.yaml
-
-- name: Create postgresql replication configmap
-  kubernetes.core.k8s:
-    state: present
-    src: ./files/postgresql_utils.yaml
 
 - name: Create wikijs service
   kubernetes.core.k8s:
@@ -113,7 +77,7 @@
           matchLabels:
             app: "{{ db }}"
         serviceName: "postgres"
-        replicas: 3
+        replicas: 1
         template:
           metadata:
             labels:
@@ -121,10 +85,8 @@
           spec:
             containers:
             - name: postgres
-              image: postgres:12
+              image: postgres:11-alpine
               imagePullPolicy: Always
-              command: ["gosu"]
-              args: ["postgres", "bash", "/utils/pg-init.sh"]
               env:
               - name: POSTGRES_PASSWORD
                 valueFrom:
@@ -141,51 +103,12 @@
                   secretKeyRef:
                     name: postgres-secret
                     key: USER
-              - name: POSTGRES_REPLICATION_USERNAME
-                valueFrom:
-                  secretKeyRef:
-                    name: postgres-secret
-                    key: POSTGRES_REPLICATION_USERNAME
-              - name: POSTGRES_REPLICATION_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: postgres-secret
-                    key: POSTGRES_REPLICATION_PASSWORD
-              - name: PGPASSWORD # for pg_basebackup. It will authenticate as the replication user "replicator"
-                valueFrom:
-                  secretKeyRef:
-                    name: postgres-secret
-                    key: POSTGRES_REPLICATION_PASSWORD
-              - name: PGDATA
-                value: /var/lib/postgresql/data/pgdata
               ports:
                 - containerPort: 5432
                   name: postgres
               volumeMounts:
                 - name: app-storage
                   mountPath: /var/lib/postgresql/data
-                - name: configs
-                  mountPath: /etc/postgresql        
-                - name: podinfo
-                  mountPath: /etc/podinfo
-                - name: utils
-                  mountPath: /utils
-            volumes:
-            - name: configs
-              configMap:
-                name: postgresql-configs
-            - name: utils
-              configMap:
-                name: postgresql-utils
-            - name: podinfo
-              downwardAPI:
-                items:
-                  - path: "labels"
-                    fieldRef:
-                      fieldPath: metadata.labels
-                  - path: "annotations"
-                    fieldRef:
-                      fieldPath: metadata.annotations
         volumeClaimTemplates:
         - metadata:
             name: app-storage
@@ -262,8 +185,6 @@
         DATABASE: d2lraWpz
         USER: d2lraWpz
         PASSWORD: b2xh
-        POSTGRES_REPLICATION_USERNAME: cmVwbGljYXRvcg==
-        POSTGRES_REPLICATION_PASSWORD: b2xh
 
 - name: Create k8s hpa for wikijs deployment
   kubernetes.core.k8s:
@@ -281,62 +202,53 @@
           apiVersion: apps/v1
           kind: Deployment
           name: wikijs-deployment
-        #metrics:
-        #  - type: Resource
-        #    resource:
-        #      name: cpu
-        #      type: Utilization
-        #      averageUtilization: 50
-        targetCPUUtilizationPercentage: 50
-      #status:
-      #  currentReplicas: 1
-      #  desiredReplicas: 1
+       targetCPUUtilizationPercentage: 50
 
-- name: Install Elasticsearch crds
-  kubernetes.core.k8s:
-    state: present
-    src: ./files/crds.yaml
-
-- name: Install Elasticsearch Operator
-  kubernetes.core.k8s:
-    state: present
-    src: ./files/operator.yaml
-
-- name: Deploy Elasticsearch Cluster
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: elasticsearch.k8s.elastic.co/v1
-      kind: Elasticsearch
-      metadata:
-        name: quickstart
-        namespace: "{{ namespace }}"
-      spec:
-        version: 7.16.2
-        nodeSets:
-        - name: default
-          count: 1
-          config:
-            node.store.allow_mmap: false
-
-- name: Deploy Kibana instance
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: kibana.k8s.elastic.co/v1
-      kind: Kibana
-      metadata:
-        name: quickstart
-        namespace: "{{ namespace }}"
-      spec:
-        version: 7.16.2
-        count: 1
-        elasticsearchRef:
-          name: quickstart
-        http:
-          service:
-            spec:
-              type: LoadBalancer
+#- name: Install Elasticsearch crds
+#  kubernetes.core.k8s:
+#    state: present
+#    src: ./files/crds.yaml
+#
+#- name: Install Elasticsearch Operator
+#  kubernetes.core.k8s:
+#    state: present
+#    src: ./files/operator.yaml
+#
+#- name: Deploy Elasticsearch Cluster
+#  kubernetes.core.k8s:
+#    state: present
+#    definition:
+#      apiVersion: elasticsearch.k8s.elastic.co/v1
+#      kind: Elasticsearch
+#      metadata:
+#        name: quickstart
+#        namespace: "{{ namespace }}"
+#      spec:
+#        version: 7.16.2
+#        nodeSets:
+#        - name: default
+#          count: 1
+#          config:
+#            node.store.allow_mmap: false
+#
+#- name: Deploy Kibana instance
+#  kubernetes.core.k8s:
+#    state: present
+#    definition:
+#      apiVersion: kibana.k8s.elastic.co/v1
+#      kind: Kibana
+#      metadata:
+#        name: quickstart
+#        namespace: "{{ namespace }}"
+#      spec:
+#        version: 7.16.2
+#        count: 1
+#        elasticsearchRef:
+#          name: quickstart
+#        http:
+#          service:
+#            spec:
+#              type: LoadBalancer
 
 - name: Deploy metricbeats
   kubernetes.core.k8s:
